@@ -31,6 +31,7 @@ void stateRoundStart(){
 
 void setup() {
   arduboy.boot();
+  arduboy.flashlight();
   arduboy.setFrameRate(10);
   arduboy.initRandomSeed();
 }

@@ -160,7 +160,7 @@ void Person::updateAppearance(){
     }
     
     addLayer( eyeSprite, eyeMask, 1 );
-    
+    /*
     const uint8_t *earSprite, *earMask;
     earSprite = ears5;
     earMask = ears5_mask;
@@ -172,7 +172,8 @@ void Person::updateAppearance(){
     case 3: earSprite=ears4; earMask=ears4_mask; break;
     }
     addLayer( earSprite, earMask, 2 );
-
+    */
+    
     uint8_t hair = HAIR(flags);
     if( flags & MALE )
         hair = 5 - hair;
@@ -221,10 +222,12 @@ void Person::addLayer( const uint8_t *s, const uint8_t *m, uint8_t type ){
             s = eyes4;
             m = eyes4_mask;
         }
-    }else if( type == 2 ){
+    }/*
+    else if( type == 2 ){
         ox += 1; 
         oy += 15;
     }
+    */
     
     sprite.drawExternalMask( ox, oy, s, m, 0, 0 );
 

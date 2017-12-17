@@ -18,6 +18,6 @@ Since I don't have an Arduboy yet, all coding/testing was done in [ProjectABE](h
 
 # [Play Online](https://felipemanga.github.io/ProjectABE/?url=https://github.com/felipemanga/HelloCommander/releases/download/v0.5/HelloCommander.hex) - [Hex file](https://github.com/felipemanga/HelloCommander/releases/tag/v0.5) - [Source](https://github.com/felipemanga/HelloCommander)
 
-[1] I couldn't fit begin or flashlight and had to use arduboy.boot(). Is this bad?
+[1] EDIT: Got flashlight mode in.
 [2] Yeah, not really...
 [3] I guess? Give or take. Dunno how far it goes! :sweat_smile:
