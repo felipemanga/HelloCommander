@@ -32,7 +32,7 @@ void statePlayerTurn(){
     
     Person &soldier = player.soldiers[soldierId];
     camera = soldier.pos;
-    arduboy.setCursor(40, 0);
+    arduboy.setCursor(39, 0);
     arduboy.print(soldier.name);
     
     tmp = 0;
@@ -76,10 +76,11 @@ void stateDirectSoldier(){
 
     camera = soldier.pos;
 
-    arduboy.setCursor(40, 0);
+    arduboy.setCursor(39, 0);
+    arduboy.print(soldier.role());
     arduboy.print(soldier.name);
 
-    arduboy.setCursor(0, 55);
+    arduboy.setCursor(0, 56);
     if( tmp<10 ){
         tmp++;
         PGMSTR text = NULL;
@@ -138,11 +139,11 @@ void statePlayerWalk(){
 
     world.tiles[soldier.tileY+oy][soldier.tileX+ox] &= 0x7F;
 
-    if( (justPressed(LEFT_BUTTON) || (ox == 1 && soldier.tileX == 14)) && ox > -1 && soldier.tileX > 1 )
+    if( (justPressed(LEFT_BUTTON) || (ox == 1 && soldier.tileX == 14)) && ox > -1 && soldier.tileX >= 1 )
         ox--;
     if( (justPressed(RIGHT_BUTTON) || (ox == -1 && soldier.tileX == 1)) && ox < 1 && soldier.tileX < 15 )
         ox++;
-    if( (justPressed(UP_BUTTON) || (oy == 1 && soldier.tileY == 30)) && oy > -1 && soldier.tileY > 1 )
+    if( (justPressed(UP_BUTTON) || (oy == 1 && soldier.tileY == 30)) && oy > -1 && soldier.tileY >= 1 )
         oy--;
     if( (justPressed(DOWN_BUTTON) || (oy == -1 && soldier.tileY == 1)) && oy < 1 && soldier.tileY < 31 )
         oy++;
@@ -154,7 +155,7 @@ void statePlayerWalk(){
     LOWBYTE(camera) = soldier.tileY+oy;
 
     uint8_t cost = world.cost( soldier.tileX, soldier.tileY, ox, oy );
-    arduboy.setCursor(0,55);
+    arduboy.setCursor( 0, oy>0?0:56 );
     // arduboy.print(PGMSTR(TXT_AP) );
     arduboy.print(soldier.points);
     if( cost != 0xFF ){
@@ -202,7 +203,7 @@ bool checkNOAP( Person &soldier, uint8_t points ){
     if( soldier.points >= points )
         return false;
         
-    arduboy.setCursor(0,55);
+    arduboy.setCursor(0,56);
     arduboy.print(PGMSTR(TXT_NOAP));
     
     if( justPressed(B_BUTTON))
@@ -264,7 +265,7 @@ void statePlayerShoot(){
     // world.render( tx, ty );
     world.tiles[ty][tx] &= 0x7F;
 
-    arduboy.setCursor(0,55);
+    arduboy.setCursor(0,56);
     arduboy.print(msg);
     
     if( justPressed(B_BUTTON) )

@@ -62,20 +62,20 @@ struct Person {
     void shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max );
 
     PGMSTR role(){
-        if( level() < 3 ){
+        if( level() < 2 ){
             id = ROOKIE;
-            return F("ROOKIE");
+            return F("ROOKIE ");
         }
         if( flags&CRAZY ){
             id = HEAVY;
-            return F("HEAVY");
+            return F("HEAVY ");
         }
         if( flags&LAZY  ){
             id = SNIPER;
-            return F("SNIPER");
+            return F("SNIPER ");
         }
         id = ASSAULT;
-        return F("ASSAULT");
+        return F("ASSAULT ");
     }
     
     void addExp( uint32_t exp ){

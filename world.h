@@ -36,9 +36,6 @@ struct World {
         if( ta == 0 ) // water
             return 2;
             
-        if( ta == 3 ) // tree
-            return 0xFF;
-        
         return 1;
     }
 };

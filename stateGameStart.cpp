@@ -21,7 +21,7 @@ void stateGameStart(){
     }
     
     arduboy.setCursor(5, 10);
-    arduboy.print(F("v0.5] Deploying..."));
+    arduboy.print(F("v0.6] Deploying..."));
     arduboy.setCursor(50, 40);
     arduboy.print( world.seed );
     

@@ -36,6 +36,11 @@ void swap( int8_t &a, int8_t &b ){
 
 bool isBlocked( int8_t x0, int8_t y0, int8_t x1, int8_t y1 )
 {
+    uint8_t alt = world.tiles[y0][x0] & 0x3;
+    if( x0 < x1 ) x0++;
+    else if( x0 > x1 ) x0--;
+    if( y0 < y1 ) y0++;
+    else if( y0 > y1 ) y0--;
   // bresenham's algorithm - thx wikpedia
   bool steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep) {
@@ -65,19 +70,23 @@ bool isBlocked( int8_t x0, int8_t y0, int8_t x1, int8_t y1 )
   }
 
   for (; x0 <= x1; x0++){
+      uint8_t x, y;
     if (steep)
     {
-      if( world.tiles[x0][y0] & 0x1C ){
-        world.tiles[x0][y0] |= 3 << 2;
-        return true;
-      }
+        x = y0;
+        y = x0;
     }
     else
     {
-      if( world.tiles[y0][x0] & 0x1C ){
+        x = x0;
+        y = y0;
+    }
+    
+    if( world.tiles[y0][x0] & 0x3 > alt )
+        return true;
+    if( world.tiles[y0][x0] & 0x1C ){
         world.tiles[y0][x0] |= 3 << 2;
         return true;
-      }
     }
 
     err -= dy;
@@ -97,7 +106,9 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
             
             uint8_t dmg = 10;
             if( id ) dmg += (5 - id) << 1;
-            int8_t diff = world.tiles[tileY][tileX] - world.tiles[ty][tx];
+            dmg *= random(8, 12);
+
+            int8_t diff = (world.tiles[tileY][tileX]&3) - (world.tiles[ty][tx]&3);
             if( diff > 0 ) dmg <<= 1;
             else if( diff < 0 ) dmg >>= 1;
             if( soldier.perks & PERKT_HIDEF ) dmg >>= 1;
@@ -107,8 +118,6 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
             points = 0;
             ammo--;
             uint8_t ex = soldier.experience / 5 + 10;
-            
-            dmg *= random(7, 13);
             
             if( dmg > soldier.health ){
                 soldier.health = 0;
@@ -121,7 +130,7 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
                 ex *= 2;
             }
             
-            arduboy.setCursor(0, 55);
+            arduboy.setCursor(0, 56);
             arduboy.print(dmg);
             arduboy.print(F("DMG  +"));
             arduboy.print(ex);
