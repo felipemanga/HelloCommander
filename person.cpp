@@ -4,6 +4,7 @@
 #include "enemy.h"
 #include "bmp.h"
 
+int8_t fx, fy, blink;
 const char nameParts[] PROGMEM = "SaKaMoNimomikutokoranijiRoBoJuLimonokutokoroniji";
 
 void nextSoldier( Person *soldiers, int8_t &current, uint8_t max, int8_t add ){
@@ -27,6 +28,68 @@ void Person::printHP(){
     arduboy.print( F("%") );
 }
 
+void swap( int8_t &a, int8_t &b ){
+    int8_t t = a;
+    a = b;
+    b = t;
+}
+
+bool isBlocked( int8_t x0, int8_t y0, int8_t x1, int8_t y1 )
+{
+  // bresenham's algorithm - thx wikpedia
+  bool steep = abs(y1 - y0) > abs(x1 - x0);
+  if (steep) {
+    swap(x0, y0);
+    swap(x1, y1);
+  }
+
+  if (x0 > x1) {
+    swap(x0, x1);
+    swap(y0, y1);
+  }
+
+  int8_t dx, dy;
+  dx = x1 - x0;
+  dy = abs(y1 - y0);
+
+  int8_t err = dx / 2;
+  int8_t ystep;
+
+  if (y0 < y1)
+  {
+    ystep = 1;
+  }
+  else
+  {
+    ystep = -1;
+  }
+
+  for (; x0 <= x1; x0++){
+    if (steep)
+    {
+      if( world.tiles[x0][y0] & 0x1C ){
+        world.tiles[x0][y0] |= 3 << 2;
+        return true;
+      }
+    }
+    else
+    {
+      if( world.tiles[y0][x0] & 0x1C ){
+        world.tiles[y0][x0] |= 3 << 2;
+        return true;
+      }
+    }
+
+    err -= dy;
+    if (err < 0)
+    {
+      y0 += ystep;
+      err += dx;
+    }
+  }
+  return false;
+}
+
 void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
     for( uint8_t i=0; i<max; ++i ){
         Person &soldier = soldiers[i];
@@ -34,13 +97,16 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
             
             uint8_t dmg = 10;
             if( id ) dmg += (5 - id) << 1;
-            int8_t diff = world.tiles[soldier.tileY][soldier.tileX] - world.tiles[ty][tx];
+            int8_t diff = world.tiles[tileY][tileX] - world.tiles[ty][tx];
             if( diff > 0 ) dmg <<= 1;
             else if( diff < 0 ) dmg >>= 1;
             if( soldier.perks & PERKT_HIDEF ) dmg >>= 1;
+            if( isBlocked(tileX, tileY, tx, ty) )
+                dmg >>= 2;
+            
             points = 0;
             ammo--;
-            uint8_t ex = soldier.level();
+            uint8_t ex = soldier.experience / 5 + 10;
             
             dmg *= random(7, 13);
             
@@ -143,7 +209,7 @@ uint8_t Person::scan( uint8_t target, uint8_t &tx, uint8_t &ty, uint8_t maxCount
 
 void Person::updateAppearance(){
             
-    addLayer( base1, base1_mask );
+    addLayer( base1, NULL );
 
     uint8_t eyes = EYES(flags)%2;
     if( flags & MALE )
@@ -202,8 +268,6 @@ void Person::updateAppearance(){
     
 }
 
-int8_t fx, fy, blink;
-
 void Person::render( int8_t x, int8_t y, char _blink ){
     
     fx = x; fy = y; blink = _blink;
@@ -229,6 +293,6 @@ void Person::addLayer( const uint8_t *s, const uint8_t *m, uint8_t type ){
     }
     */
     
-    sprite.drawExternalMask( ox, oy, s, m, 0, 0 );
+    sprite.draw( ox, oy, s, 0, m, 0, SPRITE_AUTO_MODE );
 
 }

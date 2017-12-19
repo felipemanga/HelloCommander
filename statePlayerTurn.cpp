@@ -111,7 +111,7 @@ void stateDirectSoldier(){
         return;
     }
 
-    soldier.render( 0, 10, arduboy.everyXFrames(47) );
+    soldier.render( 0, 0, arduboy.everyXFrames(47) );
     
     for( uint8_t i=0; i<5; ++i ){
         arduboy.setCursor(128-6*8, 10+i*8);

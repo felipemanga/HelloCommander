@@ -78,7 +78,7 @@ void statePartyManagement(){
         if( occupied >> i ) continue;
         int16_t y = ( ( ( int16_t(i+1)<<4 ) - (scrollPos>>3) ) * 45 >> 4 ) - 35;
         if( y < -50 || y >= HEIGHT ) continue;
-        sprite.drawExternalMask( 0, y, base1, base1_mask, 0, 0 );
+        sprite.drawExternalMask( 0, y, base1, NULL, 0, 0 );
     }
     
     Person &person = player.soldiers[selectionId];
