@@ -9,8 +9,8 @@ void Player::levelReset(){
         if( p.tileY == 0xFF ) continue;
         p.ammo = 3;
         do{
-            p.tileX = world.startX + random(-2, 2);
-            p.tileY = world.startY + random(-2, 2);
+            p.tileX = world.startX + world.random(-2, 2);
+            p.tileY = world.startY + world.random(-2, 2);
         }while( !world.togglePerson(p, 0, 0) );
         
     }

@@ -82,10 +82,16 @@ bool isBlocked( int8_t x0, int8_t y0, int8_t x1, int8_t y1 )
         y = y0;
     }
     
-    if( world.tiles[y0][x0] & 0x3 > alt )
+    uint8_t t = world.tiles[y][x];
+    if( (t & 0x3) > alt ){
+        // world.tiles[y][x] |= 0x80;
         return true;
-    if( world.tiles[y0][x0] & 0x1C ){
-        world.tiles[y0][x0] |= 3 << 2;
+    }
+    
+    t = t & 0x1C;
+    if( t && t <= (3<<2) ){
+        world.tiles[y][x] |= 3 << 2;
+        // world.tiles[y][x] |= 0x80;
         return true;
     }
 
@@ -106,11 +112,8 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
             
             uint8_t dmg = 10;
             if( id ) dmg += (5 - id) << 1;
-            dmg *= random(8, 12);
+            dmg *= world.random(4, 6);
 
-            int8_t diff = (world.tiles[tileY][tileX]&3) - (world.tiles[ty][tx]&3);
-            if( diff > 0 ) dmg <<= 1;
-            else if( diff < 0 ) dmg >>= 1;
             if( soldier.perks & PERKT_HIDEF ) dmg >>= 1;
             if( isBlocked(tileX, tileY, tx, ty) )
                 dmg >>= 2;
@@ -118,7 +121,26 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
             points = 0;
             ammo--;
             uint8_t ex = soldier.experience / 5 + 10;
-            
+
+            if( soldiers != enemy.soldiers ){
+                world.tiles[ty][tx] |= 0x80;
+                HIGHBYTE(camera) = tileX;
+                LOWBYTE(camera) = tileY;
+                waitXFrames(10);
+                world.tiles[ty][tx] &= 0x7F;
+            }
+
+            for( uint8_t j = id ? 5-id : 1; j; --j ){
+                printstrX = world.random(0, 128-8*5);
+                printstrY = world.random(8, 55-8);
+                
+                HIGHBYTE(camera) = tx+world.random(-1, 2);
+                LOWBYTE(camera) = ty+world.random(-1, 2);
+                
+                printstr = F("BANG!");
+                waitXFrames(5);
+            }
+
             if( dmg > soldier.health ){
                 soldier.health = 0;
                 soldier.points = 0;
@@ -129,19 +151,15 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
                 soldier.health -= dmg;
                 ex *= 2;
             }
-            
+            waitXFrames(1);
+
             arduboy.setCursor(0, 56);
             arduboy.print(dmg);
             arduboy.print(F("DMG  +"));
             arduboy.print(ex);
             arduboy.print(F("EXP"));
-            
-            for( uint8_t j = id ? 5-id : 1; j; --j ){
-                arduboy.setCursor(random(0, 128-8*5), random(8, 55-8));
-                arduboy.print(F("BANG!"));
-                waitXFrames(2);
-            }
-            waitXFrames(10);
+            waitXFrames(20, false);
+            printstr = NULL;
 
             addExp( ex );
             
@@ -153,34 +171,35 @@ void Person::shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max ){
 
 void Person::randomize(){
     
-    flags = random(0, 0xFF);
+    flags = world.random(0x80, 0x7F) & 0xFF;
     
-    for( uint8_t i=0; i<8; ++i )
-        if( random(0, 10) < 1 )
-            flags |= 1<<(i+7);
+    uint16_t b = 1<<7;
+    for( uint8_t i=0; i<=8; ++i, b<<=1 )
+        if( !world.random(0, 7) )
+            flags |= b;
             
     if( !(flags & MALE) )
         flags &= ~BEARD;
     else 
         flags &= ~EARS_H;
         
-    unsigned char nameLength = (random(0, 10) * random(1, 10)) / 30;
+    unsigned char nameLength = (world.random(0, 10) * world.random(1, 10)) / 30;
     unsigned char pos = 0;
     const char *parts = nameParts;
     if( flags & MALE )
         parts += 24; // 4x3x2
     
     uint8_t i=0;
-    pos = random(0, 4)*2;
+    pos = world.random(0, 4)*2;
     name[i++] = pgm_read_byte(parts+pos++);
     name[i++] = pgm_read_byte(parts+pos);
     for( uint8_t p=0; p<nameLength; ++p ){
-        pos = random(0, 4)*2 + 4*2;
+        pos = world.random(0, 4)*2 + 4*2;
         name[i++] = pgm_read_byte(parts+pos++);
         name[i++] = pgm_read_byte(parts+pos);
     }
     
-    pos = random(0, 4)*2 + 4*2*2;
+    pos = world.random(0, 4)*2 + 4*2*2;
     name[i++] = pgm_read_byte(parts+pos++);
     name[i++] = pgm_read_byte(parts+pos);
     
@@ -262,18 +281,18 @@ void Person::updateAppearance(){
     case 5:  addLayer( hair2, hair2_mask ); break;
     }
     
-    if( flags & SCAR )
-        addLayer( acc3, acc3_mask );
-    if( flags & MOLE )
-        addLayer( acc4, acc4_mask );
-    if( flags & GLASS )
-        addLayer( acc2, acc2_mask );
     if( flags & BEARD )
         addLayer( acc6, acc6_mask );
     else if( flags & CHBBY )
         addLayer( acc1, acc1_mask );
+    if( flags & GLASS )
+        addLayer( acc2, acc2_mask );
     if( flags & CLOWN )
         addLayer( acc5, acc5_mask );
+    if( flags & SCAR )
+        addLayer( acc3, acc3_mask );
+    if( flags & MOLE )
+        addLayer( acc4, acc4_mask );
     
 }
 

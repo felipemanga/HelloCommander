@@ -33,9 +33,12 @@ inline int8_t COS( int16_t x ){
     return SIN(x+180);
 }
 
-void waitXFrames( uint8_t t );
+void waitXFrames( uint8_t t, bool redraw=true );
 
 uint32_t isqrt( uint32_t a_nInput );
+
+extern PGMSTR printstr;
+extern uint8_t printstrX, printstrY;
 
 #define MAX_ENEMY_COUNT 10
 #define MAX_PARTY_SIZE 4

@@ -32,7 +32,7 @@ void statePlayerTurn(){
     
     Person &soldier = player.soldiers[soldierId];
     camera = soldier.pos;
-    arduboy.setCursor(39, 0);
+    arduboy.setCursor(38, 0);
     arduboy.print(soldier.name);
     
     tmp = 0;
@@ -51,8 +51,9 @@ void statePlayerTurn(){
     if( tmp )
         nextSoldier( player.soldiers, soldierId, MAX_PARTY_SIZE, tmp );
 
-    arduboy.setCursor(1,56);
-    arduboy.print("A] Walk  B] Commands ");
+    printstrX = 1;
+    printstrY = 56;
+    printstr = F("A] Walk  B] Commands ");
 }
 
 const char TXT_WALK[] PROGMEM =   "  WALK  ";
@@ -61,6 +62,7 @@ const char TXT_DUCK[] PROGMEM =   "  DUCK  ";
 const char TXT_RELOAD[] PROGMEM = " RELOAD ";
 const char TXT_ENDT[] PROGMEM =   "END TURN";
 const char * const OPTS[] PROGMEM = { TXT_WALK, TXT_SHOOT, TXT_DUCK, TXT_RELOAD, TXT_ENDT };
+const FunctionPointer playerStates[] PROGMEM = {statePlayerWalk, statePlayerShoot, stateDuck, stateReload, stateElfTurn};
 
 void stateDirectSoldier(){
     uint8_t &tmp = stateVars[1];
@@ -72,11 +74,12 @@ void stateDirectSoldier(){
         tmp = 0;
         opt = 0;
         retState = gameState;
+        printstr = NULL;
     }
 
     camera = soldier.pos;
 
-    arduboy.setCursor(39, 0);
+    arduboy.setCursor(38, 0);
     arduboy.print(soldier.role());
     arduboy.print(soldier.name);
 
@@ -107,15 +110,14 @@ void stateDirectSoldier(){
         gameState = statePlayerTurn;
         return;
     }else if( justPressed(A_BUTTON) ){
-        FunctionPointer s[] = {statePlayerWalk, statePlayerShoot, stateDuck, stateReload, stateElfTurn};
-        gameState = s[opt];
+        gameState = pgm_read_word(playerStates+opt);
         return;
     }
 
     soldier.render( 0, 0, arduboy.everyXFrames(47) );
     
     for( uint8_t i=0; i<5; ++i ){
-        arduboy.setCursor(128-6*8, 10+i*8);
+        arduboy.setCursor(128-6*8, 8+i*8);
         if( i!=opt || frame&2 )
             arduboy.print(PGMSTR(pgm_read_word(OPTS+i)));
     }
@@ -135,6 +137,7 @@ void statePlayerWalk(){
     if( !stateInitialized ){
         ox = 0;
         oy = 0;
+        printstr = NULL;
     }
 
     world.tiles[soldier.tileY+oy][soldier.tileX+ox] &= 0x7F;
@@ -203,8 +206,11 @@ bool checkNOAP( Person &soldier, uint8_t points ){
     if( soldier.points >= points )
         return false;
         
-    arduboy.setCursor(0,56);
-    arduboy.print(PGMSTR(TXT_NOAP));
+    // arduboy.setCursor(0,56);
+    // arduboy.print(PGMSTR(TXT_NOAP));
+    printstrX = 0;
+    printstrY = 56;
+    printstr = PGMSTR(TXT_NOAP);
     
     if( justPressed(B_BUTTON))
         gameState = retState;
@@ -246,27 +252,32 @@ void statePlayerShoot(){
             tx = soldier.tileX;
             
         }else{
-            world.tiles[ty][tx] |= 0x80;
 
+            world.tiles[ty][tx] &= 0x7F;
             msg = F("A] Shoot  B] Cancel");
             if( justPressed(A_BUTTON) ){
                 soldier.shoot( tx, ty, enemy.soldiers, MAX_ENEMY_COUNT );
                 gameState = statePlayerTurn;
+                return;
             }else if( justPressed(LEFT_BUTTON) )
                 stateVars[1]--;
             else if( justPressed(RIGHT_BUTTON) )
                 stateVars[1]++;
-                
+            else if( !justPressed(B_BUTTON) )
+                world.tiles[ty][tx] |= 0x80;
+            
         }
     }
     
     HIGHBYTE(camera) = tx;
     LOWBYTE(camera) = ty;
     // world.render( tx, ty );
-    world.tiles[ty][tx] &= 0x7F;
 
-    arduboy.setCursor(0,56);
-    arduboy.print(msg);
+    // arduboy.setCursor(0,56);
+    // arduboy.print(msg);
+    printstrX = 0;
+    printstrY = 56;
+    printstr = msg;
     
     if( justPressed(B_BUTTON) )
         gameState = retState;
@@ -279,8 +290,11 @@ void stateDuck(){
     
     if( checkNOAP(soldier, 5) ) return;
     
-    arduboy.setCursor(40, 8);
-    arduboy.print(F("*QUACK*"));
+    // arduboy.setCursor(40, 8);
+    // arduboy.print(F("*QUACK*"));
+    printstrX = 40;
+    printstrY = 56;
+    printstr = F("*QUACK*");
     
     soldier.perks |= PERKT_HIDEF;
     soldier.points = 0;
@@ -295,8 +309,7 @@ void stateReload(){
     Person &soldier = player.soldiers[soldierId];
 
     if( checkNOAP(soldier, 5) ) return;
-    
-    soldier.ammo = 3;
-    soldier.points -= 5;
+
+    soldier.reload();    
     gameState = statePlayerTurn;
 }

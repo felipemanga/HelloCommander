@@ -10,12 +10,22 @@ Enemy enemy;
 
 uint16_t frame;
 
+
+void waitXFrames( uint8_t t, bool redraw ){
+    while( t-- ){
+        while( !arduboy.nextFrame() );
+        if( redraw ) pre();
+        post();
+    }
+}
+
 void stateReset(){
     nextMap=1947;
     prevMap=2512;
     dialoguePosition = 0;
     msgDelivered = 1;
     level = 0;
+    world.generate(nextMap);
     player.gameReset();
     gameState = stateBossTalk;
     arduboy.setFrameRate(10);
@@ -33,10 +43,32 @@ void setup() {
   arduboy.boot();
   arduboy.flashlight();
   arduboy.setFrameRate(10);
-  arduboy.initRandomSeed();
+  
+  // arduboy.initRandomSeed();
+  power_adc_enable(); // ADC on
+  // do an ADC read from an unconnected input pin
+  ADCSRA |= _BV(ADSC); // start conversion (ADMUX has been pre-set in boot())
+  while (bit_is_set(ADCSRA, ADSC)) { } // wait for conversion complete
+  // randomSeed(((unsigned long)ADC << 16) + micros());
+  world.initSeed( ADC ^ micros() );
+  power_adc_disable(); // ADC off  
 }
 
 uint8_t previousButtonState, currentButtonState, _justPressed;
+
+void pre(){
+    arduboy.fillScreen(0);
+    if( camera+1 )
+        world.render( HIGHBYTE(camera), LOWBYTE(camera) );
+}
+
+void post(){
+    if( printstr ){
+        arduboy.setCursor( printstrX, printstrY );
+        arduboy.print( PGMSTR(printstr) );
+    }
+    arduboy.display();
+}
 
 void loop() {
     
@@ -49,15 +81,13 @@ void loop() {
 
     if( arduboy.everyXFrames(2) ) frame++;
     
-    arduboy.fillScreen(0);
-    if( camera+1 )
-        world.render( HIGHBYTE(camera), LOWBYTE(camera) );
+    pre();
     
     auto oldGameState = gameState;
     gameState();
     
     stateInitialized = gameState == oldGameState;
     
-    arduboy.display();
+    post();
     
 }

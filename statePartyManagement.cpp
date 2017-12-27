@@ -35,8 +35,10 @@ void statePartyManagement(){
     uint16_t occupied = 0;
         
     if( selectionId == -1 ){
-        arduboy.setCursor( 5, 5 );
-        arduboy.print( F("[A]   Begin Mission") );
+        // arduboy.setCursor( 5, 5 );
+        // arduboy.print( F("[A]   Begin Mission") );
+        printstrX = printstrY = 5;
+        printstr = F("[A]   Begin Mission");
         arduboy.setCursor( 5, 5+10 );
         arduboy.print( F("[DOWN] Manage Squad") );
         
@@ -68,7 +70,7 @@ void statePartyManagement(){
     for( uint8_t i=0; i<max; ++i ){
         Person &p = player.soldiers[i];
         if( p.tileY == 0xFF ) continue;
-        int16_t y = ( ( ( int16_t(p.tileY)<<4 ) - (scrollPos>>3) ) * 45 >> 4 ) - 35;
+        int16_t y = ( ( ( (p.tileY)<<4 ) - (scrollPos>>3) ) * 45 >> 4 ) - 35;
         if( y < -50 || y >= HEIGHT ) continue;
         p.render( 0, (int8_t) y + (((frame>>3)+i)&1), arduboy.everyXFrames(47) );
         occupied |= 1 << (p.tileY-1);
@@ -76,9 +78,10 @@ void statePartyManagement(){
     
     for( uint8_t i=0; i<MAX_PARTY_SIZE; ++i ){
         if( occupied >> i ) continue;
-        int16_t y = ( ( ( int16_t(i+1)<<4 ) - (scrollPos>>3) ) * 45 >> 4 ) - 35;
+        int16_t y = ( ( ( (i+1)<<4 ) - (scrollPos>>3) ) * 45 >> 4 ) - 35;
         if( y < -50 || y >= HEIGHT ) continue;
-        sprite.drawExternalMask( 0, y, base1, NULL, 0, 0 );
+        // sprite.drawExternalMask( 0, y, base1, NULL, 0, 0 );
+        sprite.draw( 0, y, base1, 0, NULL, 0, SPRITE_AUTO_MODE );
     }
     
     Person &person = player.soldiers[selectionId];
@@ -87,8 +90,11 @@ void statePartyManagement(){
         arduboy.print( person.name );
         arduboy.print( F(" Lv:") );
         arduboy.print( person.level() );
-        arduboy.setCursor( 40, 5+8 );
-        arduboy.print( F("Exp: ") );
+        // arduboy.setCursor( 40, 5+8 );
+        // arduboy.print( F("Exp: ") );
+        printstrX = 40;
+        printstrY = 5+8;
+        printstr = F("Exp: ");
         arduboy.print( person.experience );
         arduboy.setCursor( 40, 5+8*2 );
         arduboy.print( F("Role: ") );
@@ -97,9 +103,17 @@ void statePartyManagement(){
         arduboy.print( F("Health: ") );
         arduboy.print( (person.health*100L) / person.defHealth );
         arduboy.print( F("%") );
+        
+        // for debugging
+        // if( justPressed(A_BUTTON) ) person.randomize();
+        
     }else{
-        arduboy.setCursor( 40, 8 );
-        arduboy.print( F("<EMPTY>") );
+        // arduboy.setCursor( 40, 8 );
+        // arduboy.print( F("<EMPTY>") );
+        printstrX = 40;
+        printstrY = 8;
+        printstr = F("<EMPTY>");
+        
     }
     
 }

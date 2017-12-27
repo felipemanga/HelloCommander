@@ -25,10 +25,20 @@ bool World::togglePerson( Person &p, char isEnemy, char rem ){
 
 int32_t prevX, prevY;
 
-#define NOISE( x, y, z ) ((SIN( (uint16_t(((y)+seed)/z)*13) + (uint16_t(((x)+seed)/z)*78) )*23789&0xFF)*z)
+uint16_t World::NOISE( uint8_t x, uint8_t y, uint8_t z ){
+    return ((SIN( (uint16_t(((y)+seed)/z)*13) + (uint16_t(((x)+seed)/z)*78) )*23789&0xFF)*z);
+}
+
+int8_t World::random(int8_t min, int8_t max){
+    return (SIN( (frame*13+(nextId++)*79)*seed )*23789&0x3FF>>2 ) % (max-min) + min;
+}
+
+void World::initSeed( uint8_t seed ){
+    nextId = seed;
+}
 
 uint8_t World::point( uint8_t x, uint8_t y, uint8_t a, uint8_t b, uint8_t c ){
-    int16_t h = 0x80 + NOISE(x, y, 8) + NOISE(x, y, 4) + NOISE(x, y, 2) + NOISE(x, y, 1);
+    int16_t h = 0x80 + NOISE(x, y, 8) + NOISE(x, y, 4) + NOISE(x, y, 2) + NOISE(x, y, 1)*4;
     h >>= 4;
     if( h > a ) return 3;
     else 
@@ -43,7 +53,7 @@ void World::generate( uint16_t seed ){
     for( uint8_t y=0; y<32; y++ )
         for( uint8_t x=0; x<16; x++ ){
             if( (tiles[y][x] = point(x, y, 200, 100, 50)) ){
-                tiles[y][x] |= point(x+80, y+80, 210, 200, 180 ) << 2;
+                tiles[y][x] |= point(x+80, y+80, 240, 225, 190 ) << 2;
             }
         }
     
@@ -61,7 +71,6 @@ void World::generate( uint16_t seed ){
         }
     }while( (tiles[startY][startX]|tiles[endY][endX])&0x7C  );
     
-    nextId = 0;
     prevX = (-startX*16)+(WIDTH/2)-8; 
     prevY = (-startY*16)+(HEIGHT/2)-8;
     tiles[endY][endX] |= 4 << 2;

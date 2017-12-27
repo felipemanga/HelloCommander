@@ -20,10 +20,10 @@ void stateGameStart(){
         timer = 60;
     }
     
-    arduboy.setCursor(5, 10);
-    arduboy.print(F("v0.6] Deploying..."));
-    arduboy.setCursor(50, 40);
-    arduboy.print( world.seed );
+    printstrX = 5;
+    printstrY = 10;
+    printstr = F("v0.7] Bunker #");
+    arduboy.print( level );
     
     if( !timer-- ){
         gameState = stateRoundStart;

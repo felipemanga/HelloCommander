@@ -14,6 +14,10 @@ struct World {
     
     bool togglePerson( Person &p, char isEnemy, char rem );
 
+    uint16_t NOISE( uint8_t x, uint8_t y, uint8_t z );
+    void initSeed( uint8_t seed );
+    int8_t random(int8_t min, int8_t max);
+    
     uint8_t cost( uint8_t tx, uint8_t ty, int8_t ox, int8_t oy ){
         if( !ox && !oy ) return 0;
         ox += tx;

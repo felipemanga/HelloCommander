@@ -32,7 +32,6 @@
 #define ASSAULT 2
 #define SNIPER  3
 
-extern uint8_t nextId;
 struct Person {
     
     char name[10];
@@ -60,6 +59,17 @@ struct Person {
     }
     
     void shoot( uint8_t tx, uint8_t ty, Person *soldiers, uint8_t max );
+    
+    void reload(){
+        ammo = 3;
+        points -= 5;
+        
+        printstrX = 40;
+        printstrY = 56;
+        printstr = F("RELOADING!");
+        waitXFrames(5);
+        
+    }
 
     PGMSTR role(){
         if( level() < 2 ){

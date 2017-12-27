@@ -18,8 +18,8 @@ void Enemy::levelReset( uint8_t difficulty ){
     if( !difficulty )
         return;
     
-    uint16_t seed = world.seed * random(1,4);
-    randomSeed( seed );
+    // uint16_t seed = world.seed * world.random(1,4);
+    // randomSeed( seed );
 
     uint8_t count = difficulty + 1;
     if( count >= MAX_ENEMY_COUNT )
@@ -28,15 +28,15 @@ void Enemy::levelReset( uint8_t difficulty ){
     for( uint8_t i=0; i<count; ++i ){
         Person &p = soldiers[i];
         p.spawn();
-        p.addExp( random(difficulty*5, difficulty*15) );
+        p.addExp( world.random(difficulty*5, difficulty*15) );
         p.ammo = 3;
         do{
             
-            p.tileX = random(2, 13);
+            p.tileX = world.random(2, 13);
             if( world.startY > 16 )
-                p.tileY = random(2, 13);
+                p.tileY = world.random(2, 13);
             else
-                p.tileY = random(18, 28);
+                p.tileY = world.random(18, 28);
                 
         }while( !world.togglePerson(p, 1, 0) );
         

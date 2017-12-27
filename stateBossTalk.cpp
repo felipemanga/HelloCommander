@@ -110,8 +110,11 @@ void stateBossTalk(){
     uint8_t *fbend = Arduboy2::sBuffer+HEIGHT/8*WIDTH;
     for( uint8_t *b=fbend-nl*WIDTH; b<fbend; *b++=0 );
     
-    arduboy.setCursor( 0, 64-nl*8 );
-    arduboy.print( PGMSTR(dialogue+dialoguePosition) );
+    // arduboy.setCursor( 0, 64-nl*8 );
+    printstrX = 0;
+    printstrY = 64-nl*8;
+    printstr = PGMSTR(dialogue+dialoguePosition);
+    // arduboy.print( PGMSTR(dialogue+dialoguePosition) );
     
     
     if( (frame>>1) & 1 ){
